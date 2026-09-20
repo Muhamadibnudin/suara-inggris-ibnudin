@@ -1,35 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>B2B Cooling Solutions</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My AI Voice TTS</title>
+
+    <meta
+        name="description"
+        content="Convert English text into speech using a custom AI voice."
+    >
+
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<nav class="navbar">
-<h2>CoolingPro</h2>
-</nav>
+    <header class="header">
+        <div class="container">
+            <h1>My AI Voice TTS</h1>
+            <p>English Text to Speech with My Voice</p>
+        </div>
+    </header>
 
-<header class="hero">
-<h1>Professional B2B Cooling Solutions</h1>
-<p>Trusted by Hospitality, Real Estate & Commercial Projects</p>
-<button onclick="contact()">Request Quote</button>
-</header>
 
-<section class="services">
-<h2>Our Services</h2>
+    <main class="container">
 
-<div class="cards">
-<div class="card">Commercial Cooling</div>
-<div class="card">Industrial Cooling</div>
-<div class="card">Energy Efficient Systems</div>
-</div>
+        <section class="card">
 
-</section>
+            <h2>AI Voice Generator</h2>
 
-<script src="script.js"></script>
+            <p class="description">
+                Enter English text below and generate speech using the custom voice.
+            </p>
+
+            <label for="textInput">
+                English Text
+            </label>
+
+            <textarea
+                id="textInput"
+                maxlength="5000"
+                placeholder="Type your English text here..."
+            ></textarea>
+
+            <div class="counter">
+                <span id="charCount">0</span> / 5000 characters
+            </div>
+
+            <button id="generateBtn">
+                Generate Voice
+            </button>
+
+            <div id="loading" class="loading hidden">
+                <div class="spinner"></div>
+                <span>Generating your voice...</span>
+            </div>
+
+            <div id="errorBox" class="error hidden"></div>
+
+            <div id="resultBox" class="result hidden">
+
+                <h3>Your Audio</h3>
+
+                <audio
+                    id="audioPlayer"
+                    controls
+                    preload="metadata"
+                ></audio>
+
+                <a
+                    id="downloadBtn"
+                    class="download"
+                    href="#"
+                    download="my-ai-voice.wav"
+                >
+                    Download WAV
+                </a>
+
+            </div>
+
+        </section>
+
+
+        <section class="card info">
+
+            <h2>How It Works</h2>
+
+            <div class="steps">
+
+                <div class="step">
+                    <span>1</span>
+                    <div>
+                        <h3>Enter Text</h3>
+                        <p>
+                            Write the English text you want to convert into speech.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span>2</span>
+                    <div>
+                        <h3>Generate</h3>
+                        <p>
+                            The backend processes your text using the AI voice model.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span>3</span>
+                    <div>
+                        <h3>Listen & Download</h3>
+                        <p>
+                            Listen to the generated audio or download the WAV file.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <footer>
+        <div class="container">
+            <p>
+                © 2026 My AI Voice TTS
+            </p>
+        </div>
+    </footer>
+
+
+    <script src="script.js"></script>
+
 </body>
 </html>
