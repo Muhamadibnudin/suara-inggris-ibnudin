@@ -2,137 +2,226 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>My AI Voice TTS</title>
 
     <meta
-        name="description"
-        content="Convert English text into speech using a custom AI voice."
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
     >
+
+    <title>AI English Voice Generator</title>
 
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-    <header class="header">
-        <div class="container">
-            <h1>My AI Voice TTS</h1>
-            <p>English Text to Speech with My Voice</p>
-        </div>
-    </header>
-
-
     <main class="container">
 
+        <header class="header">
+            <div class="logo">
+                🎙️
+            </div>
+
+            <h1>AI English Voice Generator</h1>
+
+            <p>
+                Generate English voice using your own voice
+                with OpenVoice V2 + Google Colab.
+            </p>
+        </header>
+
+
+        <!-- TEXT -->
         <section class="card">
 
-            <h2>AI Voice Generator</h2>
-
-            <p class="description">
-                Enter English text below and generate speech using the custom voice.
-            </p>
-
-            <label for="textInput">
-                English Text
-            </label>
+            <h2>1. English Script</h2>
 
             <textarea
                 id="textInput"
+                placeholder="Type your English script here..."
                 maxlength="5000"
-                placeholder="Type your English text here..."
             ></textarea>
 
             <div class="counter">
                 <span id="charCount">0</span> / 5000 characters
             </div>
 
-            <button id="generateBtn">
-                Generate Voice
-            </button>
+            <div class="button-row">
 
-            <div id="loading" class="loading hidden">
-                <div class="spinner"></div>
-                <span>Generating your voice...</span>
-            </div>
-
-            <div id="errorBox" class="error hidden"></div>
-
-            <div id="resultBox" class="result hidden">
-
-                <h3>Your Audio</h3>
-
-                <audio
-                    id="audioPlayer"
-                    controls
-                    preload="metadata"
-                ></audio>
-
-                <a
-                    id="downloadBtn"
-                    class="download"
-                    href="#"
-                    download="my-ai-voice.wav"
+                <button
+                    id="exampleBtn"
+                    class="secondary"
                 >
-                    Download WAV
-                </a>
+                    Example
+                </button>
+
+                <button
+                    id="copyTextBtn"
+                    class="secondary"
+                >
+                    Copy Text
+                </button>
 
             </div>
 
         </section>
 
 
-        <section class="card info">
+        <!-- VOICE -->
+        <section class="card">
 
-            <h2>How It Works</h2>
+            <h2>2. Your Voice Sample</h2>
+
+            <p class="description">
+                Upload a clean recording of your own voice.
+                WAV, MP3, M4A and other browser-supported audio
+                formats are accepted.
+            </p>
+
+            <label class="upload-box">
+
+                <input
+                    type="file"
+                    id="voiceInput"
+                    accept="audio/*"
+                >
+
+                <span class="upload-icon">🎤</span>
+
+                <strong>
+                    Choose your voice recording
+                </strong>
+
+                <small>
+                    Tap here to select an audio file
+                </small>
+
+            </label>
+
+            <div
+                id="voiceInfo"
+                class="voice-info hidden"
+            ></div>
+
+            <audio
+                id="voicePreview"
+                class="audio-player hidden"
+                controls
+            ></audio>
+
+            <button
+                id="downloadVoiceBtn"
+                class="secondary full hidden"
+            >
+                Download Voice Sample
+            </button>
+
+        </section>
+
+
+        <!-- COLAB -->
+        <section class="card colab-card">
+
+            <h2>3. Generate With Google Colab</h2>
+
+            <p class="description">
+                This website does not use a paid API.
+                Google Colab runs OpenVoice V2 for the actual
+                voice generation.
+            </p>
 
             <div class="steps">
 
                 <div class="step">
                     <span>1</span>
-                    <div>
-                        <h3>Enter Text</h3>
-                        <p>
-                            Write the English text you want to convert into speech.
-                        </p>
-                    </div>
+                    <p>
+                        Copy your English script.
+                    </p>
                 </div>
 
                 <div class="step">
                     <span>2</span>
-                    <div>
-                        <h3>Generate</h3>
-                        <p>
-                            The backend processes your text using the AI voice model.
-                        </p>
-                    </div>
+                    <p>
+                        Download your voice sample.
+                    </p>
                 </div>
 
                 <div class="step">
                     <span>3</span>
-                    <div>
-                        <h3>Listen & Download</h3>
-                        <p>
-                            Listen to the generated audio or download the WAV file.
-                        </p>
-                    </div>
+                    <p>
+                        Open Google Colab.
+                    </p>
                 </div>
+
+                <div class="step">
+                    <span>4</span>
+                    <p>
+                        Upload your voice sample and
+                        paste your script.
+                    </p>
+                </div>
+
+                <div class="step">
+                    <span>5</span>
+                    <p>
+                        Run OpenVoice V2 and download WAV.
+                    </p>
+                </div>
+
+            </div>
+
+            <a
+                id="colabBtn"
+                class="primary-btn"
+                href="https://colab.research.google.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                🚀 Open Google Colab
+            </a>
+
+        </section>
+
+
+        <!-- RESULT -->
+        <section class="card">
+
+            <h2>4. Result</h2>
+
+            <div class="result-box">
+
+                <div class="result-icon">
+                    🔊
+                </div>
+
+                <p>
+                    Your generated WAV file will be downloaded
+                    from Google Colab.
+                </p>
+
+                <p class="small-text">
+                    After that you can upload the WAV file
+                    to Spreaker.
+                </p>
 
             </div>
 
         </section>
 
-    </main>
 
+        <footer>
 
-    <footer>
-        <div class="container">
             <p>
-                © 2026 My AI Voice TTS
+                AI English Voice Generator
             </p>
-        </div>
-    </footer>
+
+            <p class="footer-small">
+                GitHub Pages + Google Colab + OpenVoice V2
+            </p>
+
+        </footer>
+
+    </main>
 
 
     <script src="script.js"></script>
