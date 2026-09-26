@@ -1,4 +1,6 @@
-TTS
+coqui-tts==0.27.5
+transformers==4.57.1
+gradio==6.26.0
+gradio-client
 torch
 torchaudio
-gradio
