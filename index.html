@@ -1,76 +1,336 @@
-<!-- GENERATE -->
-<section class="card">
+<!DOCTYPE html>
+<html lang="en">
 
-    <h2>3. Generate Voice</h2>
+<head>
 
-    <p class="description">
-        Your text and voice sample will be sent to
-        Google Colab for AI voice generation.
-    </p>
+    <meta charset="UTF-8">
 
-    <button
-        id="generateBtn"
-        class="primary-btn"
-        type="button"
-    >
-        🚀 Generate Voice
-    </button>
-
-    <div
-        id="loadingBox"
-        class="result-box hidden"
-    >
-        <div class="result-icon">⏳</div>
-
-        <p>
-            Generating your voice...
-        </p>
-
-        <p class="small-text">
-            Please wait. XTTS-v2 is processing your audio.
-        </p>
-    </div>
-
-    <div
-        id="errorBox"
-        class="error-box hidden"
-    ></div>
-
-</section>
-
-
-<!-- RESULT -->
-<section class="card">
-
-    <h2>4. Result</h2>
-
-    <div
-        id="resultBox"
-        class="result-box"
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
     >
 
-        <div class="result-icon">
-            🔊
+    <title>AI English Voice Generator</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+</head>
+
+
+<body>
+
+
+<main class="container">
+
+
+    <!-- HEADER -->
+
+    <header class="header">
+
+        <div class="logo">
+            🎙️
         </div>
 
+        <h1>
+            AI English Voice Generator
+        </h1>
+
         <p>
-            Your generated voice will appear here.
+            Generate English voice using your own voice
+            with XTTS-v2 + Google Colab.
         </p>
 
-    </div>
+    </header>
 
-    <audio
-        id="outputAudio"
-        class="audio-player hidden"
-        controls
-    ></audio>
 
-    <a
-        id="downloadResultBtn"
-        class="primary-btn hidden"
-        download="cloned_voice.wav"
-    >
-        ⬇️ Download Generated Voice
-    </a>
 
-</section>
+    <!-- ================================================= -->
+    <!-- 1. TEXT -->
+    <!-- ================================================= -->
+
+    <section class="card">
+
+        <h2>
+            1. English Script
+        </h2>
+
+
+        <textarea
+            id="textInput"
+            placeholder="Type your English script here..."
+            maxlength="5000"
+        ></textarea>
+
+
+        <div class="counter">
+
+            <span id="charCount">
+                0
+            </span>
+
+            / 5000 characters
+
+        </div>
+
+
+        <div class="button-row">
+
+
+            <button
+                id="exampleBtn"
+                class="secondary"
+                type="button"
+            >
+                Example
+            </button>
+
+
+            <button
+                id="copyTextBtn"
+                class="secondary"
+                type="button"
+            >
+                Copy Text
+            </button>
+
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ================================================= -->
+    <!-- 2. VOICE -->
+    <!-- ================================================= -->
+
+    <section class="card">
+
+        <h2>
+            2. Your Voice Sample
+        </h2>
+
+
+        <p class="description">
+
+            Upload a clean recording of your own voice.
+
+            WAV, MP3, M4A and other browser-supported
+            audio formats are accepted.
+
+        </p>
+
+
+        <label class="upload-box">
+
+
+            <input
+                type="file"
+                id="voiceInput"
+                accept="audio/*"
+            >
+
+
+            <span class="upload-icon">
+                🎤
+            </span>
+
+
+            <strong>
+                Choose your voice recording
+            </strong>
+
+
+            <small>
+                Tap here to select an audio file
+            </small>
+
+
+        </label>
+
+
+        <div
+            id="voiceInfo"
+            class="voice-info hidden"
+        ></div>
+
+
+        <audio
+            id="voicePreview"
+            class="audio-player hidden"
+            controls
+        ></audio>
+
+
+        <button
+            id="downloadVoiceBtn"
+            class="secondary full hidden"
+            type="button"
+        >
+            Download Voice Sample
+        </button>
+
+
+    </section>
+
+
+
+    <!-- ================================================= -->
+    <!-- 3. GENERATE -->
+    <!-- ================================================= -->
+
+    <section class="card">
+
+        <h2>
+            3. Generate Voice
+        </h2>
+
+
+        <p class="description">
+
+            Your text and voice sample will be sent to
+            Google Colab.
+
+            XTTS-v2 will generate the speech using
+            your voice.
+
+        </p>
+
+
+        <button
+            id="generateBtn"
+            class="primary-btn"
+            type="button"
+        >
+
+            🚀 Generate Voice
+
+        </button>
+
+
+        <!-- LOADING -->
+
+        <div
+            id="loadingBox"
+            class="result-box hidden"
+        >
+
+            <div class="result-icon">
+                ⏳
+            </div>
+
+
+            <p>
+                Connecting to Google Colab...
+            </p>
+
+
+            <p class="small-text">
+                Please wait.
+            </p>
+
+        </div>
+
+
+        <!-- ERROR -->
+
+        <div
+            id="errorBox"
+            class="error-box hidden"
+        ></div>
+
+
+    </section>
+
+
+
+    <!-- ================================================= -->
+    <!-- 4. RESULT -->
+    <!-- ================================================= -->
+
+    <section class="card">
+
+        <h2>
+            4. Result
+        </h2>
+
+
+        <div
+            id="resultBox"
+            class="result-box"
+        >
+
+            <div class="result-icon">
+                🔊
+            </div>
+
+
+            <p>
+                Your generated voice will appear here.
+            </p>
+
+
+            <p class="small-text">
+                Generate your voice first.
+            </p>
+
+        </div>
+
+
+        <!-- AUDIO -->
+
+        <audio
+            id="outputAudio"
+            class="audio-player hidden"
+            controls
+        ></audio>
+
+
+        <!-- DOWNLOAD -->
+
+        <a
+            id="downloadResultBtn"
+            class="primary-btn hidden"
+            download="cloned_voice.wav"
+        >
+
+            ⬇️ Download Generated Voice
+
+        </a>
+
+
+    </section>
+
+
+
+    <!-- FOOTER -->
+
+    <footer>
+
+        <p>
+            AI English Voice Generator
+        </p>
+
+
+        <p class="footer-small">
+            GitHub Pages + Google Colab + XTTS-v2
+        </p>
+
+    </footer>
+
+
+</main>
+
+
+
+<script
+    src="script.js"
+></script>
+
+
+</body>
+
+</html>
