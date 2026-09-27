@@ -8,9 +8,17 @@
 // COLAB URL
 // =====================================================
 
-
 const COLAB_URL =
     "https://3a921a77aba1b849b6.gradio.live";
+
+
+// =====================================================
+// GRADIO CLIENT VERSION
+// =====================================================
+
+const GRADIO_CLIENT_URL =
+    "https://cdn.jsdelivr.net/npm/@gradio/client@2.7.0/dist/index.min.js";
+
 
 // =====================================================
 // START AFTER HTML LOADED
@@ -21,7 +29,20 @@ document.addEventListener(
     function () {
 
         console.log(
-            "My Voice Cloner JavaScript loaded."
+            "============================================"
+        );
+
+        console.log(
+            "MY VOICE CLONER JAVASCRIPT STARTED"
+        );
+
+        console.log(
+            "Colab URL:",
+            COLAB_URL
+        );
+
+        console.log(
+            "============================================"
         );
 
 
@@ -101,13 +122,13 @@ document.addEventListener(
 
 
         // =================================================
-        // CHECK ELEMENTS
+        // CHECK HTML ELEMENTS
         // =================================================
 
         if (!textInput) {
 
             console.error(
-                "textInput tidak ditemukan."
+                "❌ textInput tidak ditemukan."
             );
 
         }
@@ -115,7 +136,7 @@ document.addEventListener(
         if (!voiceInput) {
 
             console.error(
-                "voiceInput tidak ditemukan."
+                "❌ voiceInput tidak ditemukan."
             );
 
         }
@@ -123,7 +144,7 @@ document.addEventListener(
         if (!generateBtn) {
 
             console.error(
-                "generateBtn tidak ditemukan."
+                "❌ generateBtn tidak ditemukan."
             );
 
             return;
@@ -132,10 +153,11 @@ document.addEventListener(
 
 
         // =================================================
-        // SELECTED VOICE
+        // SELECTED VOICE FILE
         // =================================================
 
-        let selectedVoiceFile = null;
+        let selectedVoiceFile =
+            null;
 
 
         // =================================================
@@ -145,11 +167,15 @@ document.addEventListener(
         function updateCounter() {
 
             if (!textInput) {
+
                 return;
+
             }
+
 
             const length =
                 textInput.value.length;
+
 
             if (charCount) {
 
@@ -172,7 +198,7 @@ document.addEventListener(
 
 
         // =================================================
-        // EXAMPLE
+        // EXAMPLE BUTTON
         // =================================================
 
         if (exampleBtn) {
@@ -182,7 +208,9 @@ document.addEventListener(
                 function () {
 
                     if (!textInput) {
+
                         return;
+
                     }
 
 
@@ -217,7 +245,9 @@ See you in the next video.`;
                 async function () {
 
                     if (!textInput) {
+
                         return;
+
                     }
 
 
@@ -260,6 +290,12 @@ See you in the next video.`;
 
                     } catch (error) {
 
+                        console.error(
+                            "Copy error:",
+                            error
+                        );
+
+
                         alert(
                             "Could not copy automatically."
                         );
@@ -296,7 +332,12 @@ See you in the next video.`;
                     }
 
 
+                    // -------------------------------------
+                    // CHECK AUDIO FILE
+                    // -------------------------------------
+
                     if (
+                        !file.type ||
                         !file.type.startsWith(
                             "audio/"
                         )
@@ -320,6 +361,10 @@ See you in the next video.`;
                     }
 
 
+                    // -------------------------------------
+                    // SAVE FILE
+                    // -------------------------------------
+
                     selectedVoiceFile =
                         file;
 
@@ -334,6 +379,26 @@ See you in the next video.`;
                         ).toFixed(2);
 
 
+                    console.log(
+                        "Voice selected:",
+                        file.name
+                    );
+
+                    console.log(
+                        "Voice type:",
+                        file.type
+                    );
+
+                    console.log(
+                        "Voice size:",
+                        file.size
+                    );
+
+
+                    // -------------------------------------
+                    // DISPLAY INFORMATION
+                    // -------------------------------------
+
                     if (voiceInfo) {
 
                         voiceInfo.classList.remove(
@@ -347,29 +412,52 @@ See you in the next video.`;
                             <br>
                             <strong>Size:</strong>
                             ${sizeMB} MB
+                            <br>
+                            <strong>Type:</strong>
+                            ${escapeHtml(file.type || "unknown")}
                         `;
 
                     }
 
 
+                    // -------------------------------------
+                    // AUDIO PREVIEW
+                    // -------------------------------------
+
                     if (voicePreview) {
 
-                        const objectURL =
-                            URL.createObjectURL(
-                                file
+                        try {
+
+                            const objectURL =
+                                URL.createObjectURL(
+                                    file
+                                );
+
+
+                            voicePreview.src =
+                                objectURL;
+
+
+                            voicePreview.classList.remove(
+                                "hidden"
                             );
 
 
-                        voicePreview.src =
-                            objectURL;
+                        } catch (error) {
 
+                            console.error(
+                                "Preview error:",
+                                error
+                            );
 
-                        voicePreview.classList.remove(
-                            "hidden"
-                        );
+                        }
 
                     }
 
+
+                    // -------------------------------------
+                    // DOWNLOAD ORIGINAL
+                    // -------------------------------------
 
                     if (downloadVoiceBtn) {
 
@@ -466,9 +554,22 @@ See you in the next video.`;
             async function () {
 
 
-                // -----------------------------------------
+                console.log(
+                    "============================================"
+                );
+
+                console.log(
+                    "GENERATE BUTTON CLICKED"
+                );
+
+                console.log(
+                    "============================================"
+                );
+
+
+                // =========================================
                 // CHECK COLAB URL
-                // -----------------------------------------
+                // =========================================
 
                 if (
                     !COLAB_URL ||
@@ -486,9 +587,9 @@ See you in the next video.`;
                 }
 
 
-                // -----------------------------------------
+                // =========================================
                 // CHECK TEXT
-                // -----------------------------------------
+                // =========================================
 
                 const text =
                     textInput
@@ -507,9 +608,9 @@ See you in the next video.`;
                 }
 
 
-                // -----------------------------------------
+                // =========================================
                 // CHECK VOICE
-                // -----------------------------------------
+                // =========================================
 
                 if (!selectedVoiceFile) {
 
@@ -522,9 +623,34 @@ See you in the next video.`;
                 }
 
 
-                // -----------------------------------------
+                // =========================================
+                // FILE INFORMATION
+                // =========================================
+
+                console.log(
+                    "Text length:",
+                    text.length
+                );
+
+                console.log(
+                    "Voice file:",
+                    selectedVoiceFile.name
+                );
+
+                console.log(
+                    "Voice type:",
+                    selectedVoiceFile.type
+                );
+
+                console.log(
+                    "Voice size:",
+                    selectedVoiceFile.size
+                );
+
+
+                // =========================================
                 // DISABLE BUTTON
-                // -----------------------------------------
+                // =========================================
 
                 generateBtn.disabled =
                     true;
@@ -552,6 +678,10 @@ See you in the next video.`;
                 }
 
 
+                // =========================================
+                // CLEAR OLD RESULT
+                // =========================================
+
                 if (outputAudio) {
 
                     outputAudio.pause();
@@ -573,6 +703,10 @@ See you in the next video.`;
 
                     downloadResultBtn.classList.add(
                         "hidden"
+                    );
+
+                    downloadResultBtn.removeAttribute(
+                        "href"
                     );
 
                 }
@@ -609,21 +743,55 @@ See you in the next video.`;
                     );
 
 
-                    const {
-                        Client,
-                        handle_file
-                    } = await import(
-                        "https://cdn.jsdelivr.net/npm/@gradio/client@2.2.0/dist/index.js"
-                    );
+                    const module =
+                        await import(
+                            GRADIO_CLIENT_URL
+                        );
 
 
                     console.log(
-                        "Gradio client loaded."
+                        "Gradio module loaded:",
+                        module
+                    );
+
+
+                    const Client =
+                        module.Client;
+
+
+                    const handle_file =
+                        module.handle_file;
+
+
+                    if (!Client) {
+
+                        throw new Error(
+                            "Gradio Client tidak ditemukan."
+                        );
+
+                    }
+
+
+                    if (!handle_file) {
+
+                        throw new Error(
+                            "handle_file tidak ditemukan."
+                        );
+
+                    }
+
+
+                    console.log(
+                        "✓ Client tersedia"
+                    );
+
+                    console.log(
+                        "✓ handle_file tersedia"
                     );
 
 
                     // =====================================
-                    // CONNECT
+                    // CONNECT TO COLAB
                     // =====================================
 
                     generateBtn.textContent =
@@ -642,7 +810,7 @@ See you in the next video.`;
                             </p>
 
                             <p class="small-text">
-                                ${escapeHtml(COLAB_URL)}
+                                Connecting to Gradio server...
                             </p>
                         `;
 
@@ -662,16 +830,50 @@ See you in the next video.`;
 
 
                     console.log(
-                        "Connected to Gradio."
+                        "============================================"
+                    );
+
+                    console.log(
+                        "✓ CONNECTED TO GRADIO"
+                    );
+
+                    console.log(
+                        "============================================"
                     );
 
 
                     // =====================================
-                    // UPLOAD / GENERATE
+                    // VIEW API
+                    // =====================================
+
+                    try {
+
+                        const apiInfo =
+                            await client.view_api();
+
+
+                        console.log(
+                            "Gradio API information:",
+                            apiInfo
+                        );
+
+
+                    } catch (apiError) {
+
+                        console.warn(
+                            "view_api() gagal:",
+                            apiError
+                        );
+
+                    }
+
+
+                    // =====================================
+                    // UPDATE UI
                     // =====================================
 
                     generateBtn.textContent =
-                        "📤 Sending...";
+                        "📤 Uploading...";
 
 
                     if (resultBox) {
@@ -686,45 +888,42 @@ See you in the next video.`;
                             </p>
 
                             <p class="small-text">
-                                XTTS-v2 will process it next.
+                                Please wait while the file is uploaded.
                             </p>
                         `;
 
                     }
 
 
+                    // =====================================
+                    // PREPARE FILE
+                    // =====================================
+
                     console.log(
-                        "Sending request..."
+                        "Preparing voice file..."
                     );
 
 
-                    const result =
-                        await client.predict(
-                            "/generate_voice",
-                            {
-                                reference_audio:
-                                    handle_file(
-                                        selectedVoiceFile
-                                    ),
-
-                                text:
-                                    text,
-
-                                language:
-                                    "en"
-                            }
+                    const voiceFile =
+                        handle_file(
+                            selectedVoiceFile
                         );
 
 
                     console.log(
-                        "Colab result:",
-                        result
+                        "Voice file prepared:",
+                        voiceFile
                     );
 
 
                     // =====================================
-                    // GET OUTPUT
+                    // CALL XTTS ENDPOINT
                     // =====================================
+
+                    console.log(
+                        "Calling /generate_voice ..."
+                    );
+
 
                     generateBtn.textContent =
                         "⚙️ Processing...";
@@ -742,22 +941,67 @@ See you in the next video.`;
                             </p>
 
                             <p class="small-text">
-                                Do not close this page.
+                                Please wait. This can take some time.
                             </p>
                         `;
 
                     }
 
 
+                    const result =
+                        await client.predict(
+                            "/generate_voice",
+                            [
+                                voiceFile,
+                                text,
+                                "en"
+                            ]
+                        );
+
+
+                    // =====================================
+                    // LOG RESULT
+                    // =====================================
+
+                    console.log(
+                        "============================================"
+                    );
+
+                    console.log(
+                        "GRADIO RESULT"
+                    );
+
+                    console.log(
+                        result
+                    );
+
+                    console.log(
+                        "============================================"
+                    );
+
+
+                    // =====================================
+                    // CHECK RESULT
+                    // =====================================
+
+                    if (
+                        !result ||
+                        !result.data
+                    ) {
+
+                        throw new Error(
+                            "Colab tidak mengembalikan data."
+                        );
+
+                    }
+
+
                     const output =
-                        result &&
-                        result.data
-                            ? result.data[0]
-                            : null;
+                        result.data[0];
 
 
                     console.log(
-                        "Output:",
+                        "Output audio:",
                         output
                     );
 
@@ -821,10 +1065,25 @@ See you in the next video.`;
                     }
 
 
+                    else if (
+                        output.data &&
+                        output.data.url
+                    ) {
+
+                        audioURL =
+                            output.data.url;
+
+                    }
+
+
+                    // =====================================
+                    // CHECK AUDIO URL
+                    // =====================================
+
                     if (!audioURL) {
 
-                        console.log(
-                            "Unknown output:",
+                        console.error(
+                            "Unknown output format:",
                             output
                         );
 
@@ -843,7 +1102,7 @@ See you in the next video.`;
 
 
                     // =====================================
-                    // DISPLAY RESULT
+                    // SHOW AUDIO
                     // =====================================
 
                     if (outputAudio) {
@@ -856,13 +1115,24 @@ See you in the next video.`;
                             "hidden"
                         );
 
+
+                        outputAudio.load();
+
                     }
 
+
+                    // =====================================
+                    // SHOW DOWNLOAD BUTTON
+                    // =====================================
 
                     if (downloadResultBtn) {
 
                         downloadResultBtn.href =
                             audioURL;
+
+
+                        downloadResultBtn.download =
+                            "cloned_voice.wav";
 
 
                         downloadResultBtn.classList.remove(
@@ -871,6 +1141,10 @@ See you in the next video.`;
 
                     }
 
+
+                    // =====================================
+                    // SUCCESS MESSAGE
+                    // =====================================
 
                     if (resultBox) {
 
@@ -892,7 +1166,15 @@ See you in the next video.`;
 
 
                     console.log(
-                        "VOICE GENERATION SUCCESS"
+                        "============================================"
+                    );
+
+                    console.log(
+                        "✅ VOICE GENERATION SUCCESS"
+                    );
+
+                    console.log(
+                        "============================================"
                     );
 
 
@@ -903,8 +1185,19 @@ See you in the next video.`;
 
 
                     console.error(
-                        "Generation error:",
+                        "============================================"
+                    );
+
+                    console.error(
+                        "❌ GENERATION ERROR"
+                    );
+
+                    console.error(
                         error
+                    );
+
+                    console.error(
+                        "============================================"
                     );
 
 
@@ -941,7 +1234,7 @@ See you in the next video.`;
                             </p>
 
                             <p class="small-text">
-                                Lihat pesan error berwarna merah.
+                                ${escapeHtml(message)}
                             </p>
                         `;
 
@@ -1016,6 +1309,12 @@ See you in the next video.`;
 
             }
 
+
+            console.error(
+                "ERROR:",
+                message
+            );
+
         }
 
 
@@ -1026,6 +1325,13 @@ See you in the next video.`;
         function getFileExtension(
             filename
         ) {
+
+            if (!filename) {
+
+                return ".wav";
+
+            }
+
 
             const index =
                 filename.lastIndexOf(
@@ -1062,7 +1368,7 @@ See you in the next video.`;
 
 
             div.textContent =
-                text;
+                String(text);
 
 
             return div.innerHTML;
@@ -1078,7 +1384,15 @@ See you in the next video.`;
 
 
         console.log(
-            "My Voice Cloner initialized."
+            "============================================"
+        );
+
+        console.log(
+            "✓ My Voice Cloner initialized."
+        );
+
+        console.log(
+            "============================================"
         );
 
     }
