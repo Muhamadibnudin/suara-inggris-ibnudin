@@ -1,0 +1,76 @@
+<!-- GENERATE -->
+<section class="card">
+
+    <h2>3. Generate Voice</h2>
+
+    <p class="description">
+        Your text and voice sample will be sent to
+        Google Colab for AI voice generation.
+    </p>
+
+    <button
+        id="generateBtn"
+        class="primary-btn"
+        type="button"
+    >
+        🚀 Generate Voice
+    </button>
+
+    <div
+        id="loadingBox"
+        class="result-box hidden"
+    >
+        <div class="result-icon">⏳</div>
+
+        <p>
+            Generating your voice...
+        </p>
+
+        <p class="small-text">
+            Please wait. XTTS-v2 is processing your audio.
+        </p>
+    </div>
+
+    <div
+        id="errorBox"
+        class="error-box hidden"
+    ></div>
+
+</section>
+
+
+<!-- RESULT -->
+<section class="card">
+
+    <h2>4. Result</h2>
+
+    <div
+        id="resultBox"
+        class="result-box"
+    >
+
+        <div class="result-icon">
+            🔊
+        </div>
+
+        <p>
+            Your generated voice will appear here.
+        </p>
+
+    </div>
+
+    <audio
+        id="outputAudio"
+        class="audio-player hidden"
+        controls
+    ></audio>
+
+    <a
+        id="downloadResultBtn"
+        class="primary-btn hidden"
+        download="cloned_voice.wav"
+    >
+        ⬇️ Download Generated Voice
+    </a>
+
+</section>
