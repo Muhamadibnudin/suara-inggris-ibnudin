@@ -1,15 +1,45 @@
-/* ================================
-   GENERATION
-================================ */
+/* ==========================================
+   GENERATE
+========================================== */
+
+#generateBtn {
+    width: 100%;
+    background: #2563eb;
+    color: white;
+    margin-top: 10px;
+}
+
+#generateBtn:hover {
+    background: #1d4ed8;
+}
 
 #generateBtn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }
 
+
+/* ==========================================
+   LOADING
+========================================== */
+
+#loadingBox {
+    margin-top: 15px;
+}
+
+
+/* ==========================================
+   ERROR
+========================================== */
+
 .error-box {
+
     background: #fff1f2;
-    border: 1px solid #fecdd3;
+
+    border:
+        1px solid
+        #fecdd3;
+
     color: #be123c;
 
     border-radius: 12px;
@@ -21,11 +51,23 @@
     line-height: 1.5;
 
     font-size: 14px;
+
+    word-break: break-word;
 }
 
-#loadingBox {
+
+/* ==========================================
+   RESULT AUDIO
+========================================== */
+
+#outputAudio {
     margin-top: 15px;
 }
+
+
+/* ==========================================
+   DOWNLOAD RESULT
+========================================== */
 
 #downloadResultBtn {
     margin-top: 15px;
