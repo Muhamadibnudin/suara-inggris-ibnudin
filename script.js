@@ -15,7 +15,7 @@
 //     "https://12345abcdef.gradio.live";
 
 const COLAB_URL =
-    "PASTE_URL_GRADIO_COLAB_DI_SINI";
+    "https://abc123456789.gradio.live";
 
 
 // =====================================================
