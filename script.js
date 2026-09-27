@@ -948,15 +948,15 @@ See you in the next video.`;
                     }
 
 
-                    const result =
-                        await client.predict(
-                            "/generate_voice",
-                            [
-                                voiceFile,
-                                text,
-                                "en"
-                            ]
-                        );
+    const result =
+        await client.predict(
+        "/generate_from_website",
+        [
+            voiceFile,
+            text,
+            "en"
+        ]
+    );
 
 
                     // =====================================
