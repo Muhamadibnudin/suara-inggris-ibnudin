@@ -1,12 +1,13 @@
 # ============================================================
 # MY VOICE CLONER
-# XTTS-v2 + Gradio API
+# XTTS-v2 + Gradio
 # ============================================================
 
 import os
 import uuid
 import torch
 import gradio as gr
+
 from TTS.api import TTS
 
 
@@ -19,100 +20,93 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 print("============================================")
 print("        MY VOICE CLONER - XTTS-v2")
 print("============================================")
-print("Python device :", device)
+print("Device:", device)
 
 if torch.cuda.is_available():
-    print("GPU           :", torch.cuda.get_device_name(0))
+    print("GPU:", torch.cuda.get_device_name(0))
 else:
-    print("⚠️ GPU tidak tersedia. Proses akan lebih lambat.")
+    print("WARNING: CUDA tidak tersedia.")
 
 print("============================================")
 
 
 # ============================================================
-# LOAD XTTS-v2
+# LOAD XTTS-V2
 # ============================================================
 
 print("Loading XTTS-v2...")
 print("Mohon tunggu...")
 
-try:
+tts = TTS(
+    "tts_models/multilingual/multi-dataset/xtts_v2"
+).to(device)
 
-    tts = TTS(
-        "tts_models/multilingual/multi-dataset/xtts_v2"
-    ).to(device)
-
-    print("✅ XTTS-v2 berhasil dimuat")
-
-except Exception as e:
-
-    print("❌ Gagal memuat XTTS-v2")
-    print("Error:", e)
-
-    raise
+print("============================================")
+print("XTTS-v2 berhasil dimuat")
+print("============================================")
 
 
 # ============================================================
 # GENERATE VOICE
 # ============================================================
 
-def generate_voice(reference_audio, text, language):
+def generate_voice(
+    reference_audio,
+    text,
+    language
+):
 
     print("")
     print("============================================")
     print("NEW GENERATION REQUEST")
     print("============================================")
 
-    # --------------------------------------------------------
-    # CHECK REFERENCE AUDIO
-    # --------------------------------------------------------
+    # -------------------------
+    # CHECK AUDIO
+    # -------------------------
 
     if reference_audio is None:
-
         raise gr.Error(
             "Upload rekaman suara terlebih dahulu."
         )
 
-    # --------------------------------------------------------
+    # -------------------------
     # CHECK TEXT
-    # --------------------------------------------------------
+    # -------------------------
 
     if not text or not text.strip():
-
         raise gr.Error(
             "Masukkan teks terlebih dahulu."
         )
 
-    # --------------------------------------------------------
-    # CHECK LANGUAGE
-    # --------------------------------------------------------
+    # -------------------------
+    # DEFAULT LANGUAGE
+    # -------------------------
 
     if not language:
-
         language = "en"
 
-    # --------------------------------------------------------
-    # CHECK REFERENCE FILE
-    # --------------------------------------------------------
+    # -------------------------
+    # CHECK FILE
+    # -------------------------
 
     if not os.path.exists(reference_audio):
-
         raise gr.Error(
             "File rekaman suara tidak ditemukan."
         )
 
-    # --------------------------------------------------------
+    # -------------------------
     # OUTPUT DIRECTORY
-    # --------------------------------------------------------
+    # -------------------------
 
     os.makedirs(
         "output",
         exist_ok=True
     )
 
-    # --------------------------------------------------------
-    # UNIQUE OUTPUT FILE
-    # --------------------------------------------------------
+    # -------------------------
+    # UNIQUE OUTPUT
+    # -------------------------
 
     filename = (
         "cloned_voice_"
@@ -125,21 +119,22 @@ def generate_voice(reference_audio, text, language):
         filename
     )
 
-    # --------------------------------------------------------
+    # -------------------------
     # LOG
-    # --------------------------------------------------------
+    # -------------------------
 
     print("Reference audio :", reference_audio)
     print("Language        :", language)
     print("Text length     :", len(text.strip()))
     print("Output file     :", output_file)
+
     print("--------------------------------------------")
     print("Generating voice...")
     print("--------------------------------------------")
 
-    # --------------------------------------------------------
+    # -------------------------
     # XTTS GENERATION
-    # --------------------------------------------------------
+    # -------------------------
 
     try:
 
@@ -153,7 +148,7 @@ def generate_voice(reference_audio, text, language):
     except Exception as e:
 
         print("")
-        print("❌ XTTS GENERATION ERROR")
+        print("❌ XTTS ERROR")
         print("Error:", e)
         print("")
 
@@ -161,34 +156,36 @@ def generate_voice(reference_audio, text, language):
             f"Gagal membuat suara: {str(e)}"
         )
 
-    # --------------------------------------------------------
+    # -------------------------
     # CHECK OUTPUT
-    # --------------------------------------------------------
+    # -------------------------
 
     if not os.path.exists(output_file):
 
         raise gr.Error(
-            "Audio berhasil diproses tetapi file output tidak ditemukan."
+            "Audio selesai diproses tetapi file WAV tidak ditemukan."
         )
 
     file_size = os.path.getsize(
         output_file
     )
 
-    if file_size == 0:
+    if file_size <= 0:
 
         raise gr.Error(
-            "File audio kosong."
+            "File WAV kosong."
         )
 
-    # --------------------------------------------------------
+    # -------------------------
     # SUCCESS
-    # --------------------------------------------------------
+    # -------------------------
 
     print("")
+    print("============================================")
     print("✅ VOICE GENERATION SUCCESS")
-    print("Output :", output_file)
-    print("Size   :", file_size, "bytes")
+    print("============================================")
+    print("Output:", output_file)
+    print("Size:", file_size, "bytes")
     print("============================================")
     print("")
 
@@ -211,18 +208,18 @@ with gr.Blocks(
         """
     )
 
-    # --------------------------------------------------------
-    # REFERENCE VOICE
-    # --------------------------------------------------------
+    # -------------------------
+    # VOICE
+    # -------------------------
 
     reference_audio = gr.Audio(
         label="🎤 Your Voice",
         type="filepath"
     )
 
-    # --------------------------------------------------------
+    # -------------------------
     # TEXT
-    # --------------------------------------------------------
+    # -------------------------
 
     text = gr.Textbox(
         label="📝 Text",
@@ -230,9 +227,9 @@ with gr.Blocks(
         lines=8
     )
 
-    # --------------------------------------------------------
+    # -------------------------
     # LANGUAGE
-    # --------------------------------------------------------
+    # -------------------------
 
     language = gr.Dropdown(
         choices=[
@@ -254,36 +251,41 @@ with gr.Blocks(
         label="🌎 Language"
     )
 
-    # --------------------------------------------------------
-    # GENERATE BUTTON
-    # --------------------------------------------------------
+    # -------------------------
+    # BUTTON
+    # -------------------------
 
     generate_button = gr.Button(
         "🔊 GENERATE VOICE",
         variant="primary"
     )
 
-    # --------------------------------------------------------
+    # -------------------------
     # OUTPUT
-    # --------------------------------------------------------
+    # -------------------------
 
     output_audio = gr.Audio(
         label="🔊 Generated Voice",
         type="filepath"
     )
 
-    # --------------------------------------------------------
+    # -------------------------
     # API
-    # --------------------------------------------------------
+    # -------------------------
 
     generate_button.click(
         fn=generate_voice,
+
         inputs=[
             reference_audio,
             text,
             language
         ],
-        outputs=output_audio,
+
+        outputs=[
+            output_audio
+        ],
+
         api_name="generate_voice"
     )
 
@@ -300,4 +302,4 @@ print("============================================")
 app.launch(
     share=True,
     show_error=True
-    )
+)
