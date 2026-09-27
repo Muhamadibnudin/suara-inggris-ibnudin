@@ -9,7 +9,7 @@
 // ============================================================
 
 const COLAB_URL =
-    "https://3a921a77aba1b849b6.gradio.live";
+    "https://d1a6353dab6c3815d5.gradio.live";
 
 const GRADIO_CLIENT_URL =
     "https://cdn.jsdelivr.net/npm/@gradio/client@2.7.0/dist/index.min.js";
@@ -237,6 +237,7 @@ if (copyTextBtn) {
                 textInput.value;
 
             if (!text) {
+
                 showError(
                     "Tidak ada teks untuk disalin."
                 );
@@ -306,6 +307,7 @@ if (voiceInput) {
                 file
             );
 
+
             // ------------------------------------------------
             // INFO
             // ------------------------------------------------
@@ -322,6 +324,7 @@ if (voiceInput) {
                 voiceInfo.textContent =
                     `${file.name} • ${sizeMB} MB`;
             }
+
 
             // ------------------------------------------------
             // PREVIEW
@@ -350,6 +353,7 @@ if (voiceInput) {
                     );
                 }
             }
+
 
             // ------------------------------------------------
             // DOWNLOAD ORIGINAL
@@ -407,6 +411,7 @@ async function loadGradioClient() {
                 GRADIO_CLIENT_URL
             );
 
+
         if (!module.Client) {
 
             throw new Error(
@@ -414,18 +419,22 @@ async function loadGradioClient() {
             );
         }
 
+
         const Client =
             module.Client;
+
 
         gradioClient =
             await Client.connect(
                 COLAB_URL
             );
 
+
         console.log(
             "Gradio connected:",
             gradioClient
         );
+
 
         return gradioClient;
 
@@ -436,8 +445,9 @@ async function loadGradioClient() {
             error
         );
 
+
         throw new Error(
-            "Tidak dapat terhubung ke server Colab. Pastikan runtime Colab masih aktif."
+            "Tidak dapat terhubung ke server Colab. Pastikan runtime Colab masih aktif dan URL Gradio masih berlaku."
         );
     }
 }
@@ -454,13 +464,14 @@ function extractAudioURL(result) {
         result
     );
 
+
     if (!result) {
         return null;
     }
 
 
     // --------------------------------------------------------
-    // result.data
+    // RESULT DATA
     // --------------------------------------------------------
 
     const data =
@@ -475,9 +486,7 @@ function extractAudioURL(result) {
 
             const found =
                 extractAudioURL(
-                    {
-                        data: item
-                    }
+                    item
                 );
 
             if (found) {
@@ -525,7 +534,11 @@ function extractAudioURL(result) {
         "object"
     ) {
 
-        // url
+
+        // ----------------------------------------------------
+        // URL
+        // ----------------------------------------------------
+
         if (
             typeof result.url ===
             "string"
@@ -535,7 +548,10 @@ function extractAudioURL(result) {
         }
 
 
-        // path
+        // ----------------------------------------------------
+        // PATH
+        // ----------------------------------------------------
+
         if (
             typeof result.path ===
             "string"
@@ -545,7 +561,10 @@ function extractAudioURL(result) {
         }
 
 
-        // file.url
+        // ----------------------------------------------------
+        // FILE URL
+        // ----------------------------------------------------
+
         if (
             result.file &&
             typeof result.file.url ===
@@ -556,7 +575,10 @@ function extractAudioURL(result) {
         }
 
 
-        // file.path
+        // ----------------------------------------------------
+        // FILE PATH
+        // ----------------------------------------------------
+
         if (
             result.file &&
             typeof result.file.path ===
@@ -567,7 +589,10 @@ function extractAudioURL(result) {
         }
 
 
-        // data.url
+        // ----------------------------------------------------
+        // DATA URL
+        // ----------------------------------------------------
+
         if (
             result.data &&
             typeof result.data.url ===
@@ -578,7 +603,10 @@ function extractAudioURL(result) {
         }
 
 
-        // data.path
+        // ----------------------------------------------------
+        // DATA PATH
+        // ----------------------------------------------------
+
         if (
             result.data &&
             typeof result.data.path ===
@@ -589,7 +617,10 @@ function extractAudioURL(result) {
         }
 
 
-        // value
+        // ----------------------------------------------------
+        // VALUE
+        // ----------------------------------------------------
+
         if (
             typeof result.value ===
             "string"
@@ -608,15 +639,17 @@ function extractAudioURL(result) {
 // NORMALIZE GRADIO URL
 // ============================================================
 
-function normalizeAudioURL(
-    url
-) {
+function normalizeAudioURL(url) {
 
     if (!url) {
         return null;
     }
 
-    // already usable
+
+    // --------------------------------------------------------
+    // ALREADY USABLE
+    // --------------------------------------------------------
+
     if (
         url.startsWith(
             "http://"
@@ -636,7 +669,10 @@ function normalizeAudioURL(
     }
 
 
-    // relative URL
+    // --------------------------------------------------------
+    // RELATIVE URL
+    // --------------------------------------------------------
+
     if (
         url.startsWith("/")
     ) {
@@ -648,7 +684,10 @@ function normalizeAudioURL(
     }
 
 
-    // local Gradio path
+    // --------------------------------------------------------
+    // GRADIO FILE PATH
+    // --------------------------------------------------------
+
     if (
         url.startsWith(
             "file="
@@ -676,11 +715,13 @@ function normalizeAudioURL(
 async function generateVoice() {
 
     hideError();
+
     hideResult();
 
-    // --------------------------------------------------------
-    // CHECK TEXT
-    // --------------------------------------------------------
+
+    // ========================================================
+    // CHECK TEXT INPUT
+    // ========================================================
 
     if (!textInput) {
 
@@ -690,6 +731,7 @@ async function generateVoice() {
 
         return;
     }
+
 
     const text =
         textInput.value.trim();
@@ -715,9 +757,9 @@ async function generateVoice() {
     }
 
 
-    // --------------------------------------------------------
+    // ========================================================
     // CHECK VOICE
-    // --------------------------------------------------------
+    // ========================================================
 
     if (!selectedVoiceFile) {
 
@@ -729,9 +771,9 @@ async function generateVoice() {
     }
 
 
-    // --------------------------------------------------------
-    // CHECK BUTTON
-    // --------------------------------------------------------
+    // ========================================================
+    // DISABLE BUTTON
+    // ========================================================
 
     if (generateBtn) {
 
@@ -748,31 +790,34 @@ async function generateVoice() {
 
     try {
 
+
+        // ====================================================
+        // CONNECT TO COLAB
+        // ====================================================
+
         showLoading(
             "Menghubungkan ke AI..."
         );
 
 
-        // ----------------------------------------------------
-        // CONNECT
-        // ----------------------------------------------------
-
         const client =
             await loadGradioClient();
 
 
-        // ----------------------------------------------------
-        // FILE
-        // ----------------------------------------------------
+        // ====================================================
+        // LOAD FILE HANDLER
+        // ====================================================
 
         showLoading(
             "Mengupload rekaman suara..."
         );
 
+
         const module =
             await import(
                 GRADIO_CLIENT_URL
             );
+
 
         const handle_file =
             module.handle_file;
@@ -786,15 +831,19 @@ async function generateVoice() {
         }
 
 
+        // ====================================================
+        // PREPARE VOICE FILE
+        // ====================================================
+
         const voiceFile =
             handle_file(
                 selectedVoiceFile
             );
 
 
-        // ----------------------------------------------------
+        // ====================================================
         // GENERATE
-        // ----------------------------------------------------
+        // ====================================================
 
         showLoading(
             "AI sedang membuat suara... Tunggu beberapa saat."
@@ -802,7 +851,24 @@ async function generateVoice() {
 
 
         console.log(
-            "Calling endpoint:",
+            "========================================"
+        );
+
+        console.log(
+            "GENERATING VOICE"
+        );
+
+        console.log(
+            "========================================"
+        );
+
+        console.log(
+            "Colab:",
+            COLAB_URL
+        );
+
+        console.log(
+            "Endpoint:",
             API_ENDPOINT
         );
 
@@ -828,19 +894,30 @@ async function generateVoice() {
             );
 
 
-        // ----------------------------------------------------
-        // RAW RESULT
-        // ----------------------------------------------------
+        // ====================================================
+        // RAW RESPONSE
+        // ====================================================
 
         console.log(
-            "RAW GRADIO RESULT:",
+            "========================================"
+        );
+
+        console.log(
+            "RAW GRADIO RESULT:"
+        );
+
+        console.log(
             result
         );
 
+        console.log(
+            "========================================"
+        );
 
-        // ----------------------------------------------------
-        // EXTRACT
-        // ----------------------------------------------------
+
+        // ====================================================
+        // EXTRACT AUDIO URL
+        // ====================================================
 
         let audioURL =
             extractAudioURL(
@@ -860,6 +937,10 @@ async function generateVoice() {
         );
 
 
+        // ====================================================
+        // CHECK AUDIO URL
+        // ====================================================
+
         if (!audioURL) {
 
             console.error(
@@ -867,19 +948,24 @@ async function generateVoice() {
                 result
             );
 
+
             throw new Error(
-                "Server berhasil merespons tetapi URL audio hasil tidak ditemukan."
+                "Server berhasil membuat response tetapi URL audio hasil tidak ditemukan."
             );
         }
 
 
-        // ----------------------------------------------------
-        // OUTPUT AUDIO
-        // ----------------------------------------------------
+        // ====================================================
+        // SAVE GENERATED URL
+        // ====================================================
 
         generatedAudioURL =
             audioURL;
 
+
+        // ====================================================
+        // AUDIO PLAYER
+        // ====================================================
 
         if (outputAudio) {
 
@@ -896,9 +982,9 @@ async function generateVoice() {
         }
 
 
-        // ----------------------------------------------------
-        // DOWNLOAD RESULT
-        // ----------------------------------------------------
+        // ====================================================
+        // DOWNLOAD BUTTON
+        // ====================================================
 
         if (downloadResultBtn) {
 
@@ -913,9 +999,9 @@ async function generateVoice() {
         }
 
 
-        // ----------------------------------------------------
+        // ====================================================
         // SHOW RESULT
-        // ----------------------------------------------------
+        // ====================================================
 
         showResult();
 
@@ -937,9 +1023,25 @@ async function generateVoice() {
 
     } catch (error) {
 
+
+        // ====================================================
+        // ERROR
+        // ====================================================
+
         console.error(
-            "VOICE GENERATION ERROR:",
+            "========================================"
+        );
+
+        console.error(
+            "VOICE GENERATION ERROR"
+        );
+
+        console.error(
             error
+        );
+
+        console.error(
+            "========================================"
         );
 
 
@@ -962,15 +1064,22 @@ async function generateVoice() {
             message
         );
 
+
         hideLoading();
 
 
     } finally {
 
+
+        // ====================================================
+        // ENABLE BUTTON
+        // ====================================================
+
         if (generateBtn) {
 
             generateBtn.disabled =
                 false;
+
 
             if (
                 generateBtn.dataset.originalText
@@ -1002,10 +1111,17 @@ if (generateBtn) {
 // ============================================================
 
 hideError();
+
 hideLoading();
+
 hideResult();
+
 updateCharacterCount();
 
+
+// ============================================================
+// START MESSAGE
+// ============================================================
 
 console.log(
     "========================================"
@@ -1016,13 +1132,22 @@ console.log(
 );
 
 console.log(
-    "Colab:",
+    "========================================"
+);
+
+console.log(
+    "Colab URL:",
     COLAB_URL
 );
 
 console.log(
-    "Endpoint:",
+    "API Endpoint:",
     API_ENDPOINT
+);
+
+console.log(
+    "Gradio Client:",
+    GRADIO_CLIENT_URL
 );
 
 console.log(
