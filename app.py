@@ -1,76 +1,203 @@
+# ============================================================
+# MY VOICE CLONER
+# XTTS-v2 + Gradio API
+# ============================================================
+
 import os
+import uuid
 import torch
 import gradio as gr
 from TTS.api import TTS
 
-# =========================
+
+# ============================================================
 # DEVICE
-# =========================
+# ============================================================
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-print("================================")
-print("MY VOICE CLONER")
-print("================================")
-print("Device:", device)
+print("============================================")
+print("        MY VOICE CLONER - XTTS-v2")
+print("============================================")
+print("Python device :", device)
 
-# =========================
-# LOAD XTTS-V2
-# =========================
+if torch.cuda.is_available():
+    print("GPU           :", torch.cuda.get_device_name(0))
+else:
+    print("⚠️ GPU tidak tersedia. Proses akan lebih lambat.")
+
+print("============================================")
+
+
+# ============================================================
+# LOAD XTTS-v2
+# ============================================================
 
 print("Loading XTTS-v2...")
+print("Mohon tunggu...")
 
-tts = TTS(
-    "tts_models/multilingual/multi-dataset/xtts_v2"
-).to(device)
+try:
 
-print("✅ XTTS-v2 loaded")
+    tts = TTS(
+        "tts_models/multilingual/multi-dataset/xtts_v2"
+    ).to(device)
+
+    print("✅ XTTS-v2 berhasil dimuat")
+
+except Exception as e:
+
+    print("❌ Gagal memuat XTTS-v2")
+    print("Error:", e)
+
+    raise
 
 
-# =========================
+# ============================================================
 # GENERATE VOICE
-# =========================
+# ============================================================
 
 def generate_voice(reference_audio, text, language):
 
+    print("")
+    print("============================================")
+    print("NEW GENERATION REQUEST")
+    print("============================================")
+
+    # --------------------------------------------------------
+    # CHECK REFERENCE AUDIO
+    # --------------------------------------------------------
+
     if reference_audio is None:
+
         raise gr.Error(
             "Upload rekaman suara terlebih dahulu."
         )
 
+    # --------------------------------------------------------
+    # CHECK TEXT
+    # --------------------------------------------------------
+
     if not text or not text.strip():
+
         raise gr.Error(
             "Masukkan teks terlebih dahulu."
         )
 
-    os.makedirs("output", exist_ok=True)
+    # --------------------------------------------------------
+    # CHECK LANGUAGE
+    # --------------------------------------------------------
+
+    if not language:
+
+        language = "en"
+
+    # --------------------------------------------------------
+    # CHECK REFERENCE FILE
+    # --------------------------------------------------------
+
+    if not os.path.exists(reference_audio):
+
+        raise gr.Error(
+            "File rekaman suara tidak ditemukan."
+        )
+
+    # --------------------------------------------------------
+    # OUTPUT DIRECTORY
+    # --------------------------------------------------------
+
+    os.makedirs(
+        "output",
+        exist_ok=True
+    )
+
+    # --------------------------------------------------------
+    # UNIQUE OUTPUT FILE
+    # --------------------------------------------------------
+
+    filename = (
+        "cloned_voice_"
+        + uuid.uuid4().hex
+        + ".wav"
+    )
 
     output_file = os.path.join(
         "output",
-        "cloned_voice.wav"
+        filename
     )
 
-    print("================================")
+    # --------------------------------------------------------
+    # LOG
+    # --------------------------------------------------------
+
+    print("Reference audio :", reference_audio)
+    print("Language        :", language)
+    print("Text length     :", len(text.strip()))
+    print("Output file     :", output_file)
+    print("--------------------------------------------")
     print("Generating voice...")
-    print("Language:", language)
-    print("Reference:", reference_audio)
-    print("================================")
+    print("--------------------------------------------")
 
-    tts.tts_to_file(
-        text=text.strip(),
-        speaker_wav=reference_audio,
-        language=language,
-        file_path=output_file
+    # --------------------------------------------------------
+    # XTTS GENERATION
+    # --------------------------------------------------------
+
+    try:
+
+        tts.tts_to_file(
+            text=text.strip(),
+            speaker_wav=reference_audio,
+            language=language,
+            file_path=output_file
+        )
+
+    except Exception as e:
+
+        print("")
+        print("❌ XTTS GENERATION ERROR")
+        print("Error:", e)
+        print("")
+
+        raise gr.Error(
+            f"Gagal membuat suara: {str(e)}"
+        )
+
+    # --------------------------------------------------------
+    # CHECK OUTPUT
+    # --------------------------------------------------------
+
+    if not os.path.exists(output_file):
+
+        raise gr.Error(
+            "Audio berhasil diproses tetapi file output tidak ditemukan."
+        )
+
+    file_size = os.path.getsize(
+        output_file
     )
 
-    print("✅ Generated:", output_file)
+    if file_size == 0:
+
+        raise gr.Error(
+            "File audio kosong."
+        )
+
+    # --------------------------------------------------------
+    # SUCCESS
+    # --------------------------------------------------------
+
+    print("")
+    print("✅ VOICE GENERATION SUCCESS")
+    print("Output :", output_file)
+    print("Size   :", file_size, "bytes")
+    print("============================================")
+    print("")
 
     return output_file
 
 
-# =========================
-# GRADIO API
-# =========================
+# ============================================================
+# GRADIO INTERFACE
+# ============================================================
 
 with gr.Blocks(
     title="My Voice Cloner"
@@ -80,20 +207,32 @@ with gr.Blocks(
         """
         # 🎙️ My Voice Cloner
 
-        Generate speech using your own voice.
+        Generate speech using your own voice with XTTS-v2.
         """
     )
 
+    # --------------------------------------------------------
+    # REFERENCE VOICE
+    # --------------------------------------------------------
+
     reference_audio = gr.Audio(
-        label="Your Voice",
+        label="🎤 Your Voice",
         type="filepath"
     )
 
+    # --------------------------------------------------------
+    # TEXT
+    # --------------------------------------------------------
+
     text = gr.Textbox(
-        label="Text",
+        label="📝 Text",
         placeholder="Type your English text here...",
         lines=8
     )
+
+    # --------------------------------------------------------
+    # LANGUAGE
+    # --------------------------------------------------------
 
     language = gr.Dropdown(
         choices=[
@@ -112,18 +251,30 @@ with gr.Blocks(
             ("Korean", "ko")
         ],
         value="en",
-        label="Language"
+        label="🌎 Language"
     )
+
+    # --------------------------------------------------------
+    # GENERATE BUTTON
+    # --------------------------------------------------------
 
     generate_button = gr.Button(
         "🔊 GENERATE VOICE",
         variant="primary"
     )
 
+    # --------------------------------------------------------
+    # OUTPUT
+    # --------------------------------------------------------
+
     output_audio = gr.Audio(
-        label="Generated Voice",
+        label="🔊 Generated Voice",
         type="filepath"
     )
+
+    # --------------------------------------------------------
+    # API
+    # --------------------------------------------------------
 
     generate_button.click(
         fn=generate_voice,
@@ -137,11 +288,16 @@ with gr.Blocks(
     )
 
 
-# =========================
-# START
-# =========================
+# ============================================================
+# START GRADIO
+# ============================================================
+
+print("")
+print("============================================")
+print("Starting Gradio...")
+print("============================================")
 
 app.launch(
     share=True,
     show_error=True
-)
+    )
