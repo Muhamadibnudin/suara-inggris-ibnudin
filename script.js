@@ -8,15 +8,9 @@
 // COLAB URL
 // =====================================================
 
-// GANTI dengan URL .gradio.live milik Anda.
-//
-// Contoh:
+
 // const COLAB_URL =
-//     "https://12345abcdef.gradio.live";
-
-const COLAB_URL =
-    "https://abc123456789.gradio.live";
-
+    "https://3a921a77aba1b849b6.gradio.live";
 
 // =====================================================
 // START AFTER HTML LOADED
