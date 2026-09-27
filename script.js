@@ -1,220 +1,208 @@
-// =====================================================
-// MY VOICE CLONER
-// GitHub Pages -> Gradio -> Google Colab -> XTTS-v2
-// =====================================================
+// ============================================================
+// MY VOICE CLONER - WEBSITE FRONTEND
+// GitHub Pages -> Google Colab XTTS-v2
+// ============================================================
 
 
-// =====================================================
-// COLAB URL
-// =====================================================
+// ============================================================
+// CONFIG
+// ============================================================
 
 const COLAB_URL =
     "https://3a921a77aba1b849b6.gradio.live";
 
-
-// =====================================================
-// GRADIO CLIENT VERSION
-// =====================================================
-
 const GRADIO_CLIENT_URL =
     "https://cdn.jsdelivr.net/npm/@gradio/client@2.7.0/dist/index.min.js";
 
-
-// =====================================================
-// START AFTER HTML LOADED
-// =====================================================
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
-
-        console.log(
-            "============================================"
-        );
-
-        console.log(
-            "MY VOICE CLONER JAVASCRIPT STARTED"
-        );
-
-        console.log(
-            "Colab URL:",
-            COLAB_URL
-        );
-
-        console.log(
-            "============================================"
-        );
+const API_ENDPOINT =
+    "/generate_from_website";
 
 
-        // =================================================
-        // ELEMENTS
-        // =================================================
+// ============================================================
+// ELEMENTS
+// ============================================================
 
-        const textInput =
-            document.getElementById(
-                "textInput"
-            );
+const textInput =
+    document.getElementById("textInput");
 
-        const charCount =
-            document.getElementById(
-                "charCount"
-            );
+const charCount =
+    document.getElementById("charCount");
 
-        const exampleBtn =
-            document.getElementById(
-                "exampleBtn"
-            );
+const exampleBtn =
+    document.getElementById("exampleBtn");
 
-        const copyTextBtn =
-            document.getElementById(
-                "copyTextBtn"
-            );
+const copyTextBtn =
+    document.getElementById("copyTextBtn");
 
-        const voiceInput =
-            document.getElementById(
-                "voiceInput"
-            );
+const voiceInput =
+    document.getElementById("voiceInput");
 
-        const voiceInfo =
-            document.getElementById(
-                "voiceInfo"
-            );
+const voiceInfo =
+    document.getElementById("voiceInfo");
 
-        const voicePreview =
-            document.getElementById(
-                "voicePreview"
-            );
+const voicePreview =
+    document.getElementById("voicePreview");
 
-        const downloadVoiceBtn =
-            document.getElementById(
-                "downloadVoiceBtn"
-            );
+const downloadVoiceBtn =
+    document.getElementById("downloadVoiceBtn");
 
-        const generateBtn =
-            document.getElementById(
-                "generateBtn"
-            );
+const generateBtn =
+    document.getElementById("generateBtn");
 
-        const loadingBox =
-            document.getElementById(
-                "loadingBox"
-            );
+const loadingBox =
+    document.getElementById("loadingBox");
 
-        const errorBox =
-            document.getElementById(
-                "errorBox"
-            );
+const errorBox =
+    document.getElementById("errorBox");
 
-        const outputAudio =
-            document.getElementById(
-                "outputAudio"
-            );
+const outputAudio =
+    document.getElementById("outputAudio");
 
-        const resultBox =
-            document.getElementById(
-                "resultBox"
-            );
+const resultBox =
+    document.getElementById("resultBox");
 
-        const downloadResultBtn =
-            document.getElementById(
-                "downloadResultBtn"
-            );
+const downloadResultBtn =
+    document.getElementById("downloadResultBtn");
 
 
-        // =================================================
-        // CHECK HTML ELEMENTS
-        // =================================================
+// ============================================================
+// STATE
+// ============================================================
 
-        if (!textInput) {
+let selectedVoiceFile =
+    null;
 
-            console.error(
-                "❌ textInput tidak ditemukan."
-            );
+let generatedAudioURL =
+    null;
 
-        }
-
-        if (!voiceInput) {
-
-            console.error(
-                "❌ voiceInput tidak ditemukan."
-            );
-
-        }
-
-        if (!generateBtn) {
-
-            console.error(
-                "❌ generateBtn tidak ditemukan."
-            );
-
-            return;
-
-        }
+let gradioClient =
+    null;
 
 
-        // =================================================
-        // SELECTED VOICE FILE
-        // =================================================
+// ============================================================
+// HELPERS
+// ============================================================
 
-        let selectedVoiceFile =
-            null;
+function showError(message) {
+
+    if (!errorBox) {
+        alert(message);
+        return;
+    }
+
+    errorBox.textContent =
+        "❌ " + message;
+
+    errorBox.style.display =
+        "block";
+}
 
 
-        // =================================================
-        // CHARACTER COUNTER
-        // =================================================
+function hideError() {
 
-        function updateCounter() {
+    if (!errorBox) {
+        return;
+    }
+
+    errorBox.textContent =
+        "";
+
+    errorBox.style.display =
+        "none";
+}
+
+
+function showLoading(message) {
+
+    if (!loadingBox) {
+        return;
+    }
+
+    loadingBox.textContent =
+        message || "Generating...";
+
+    loadingBox.style.display =
+        "block";
+}
+
+
+function hideLoading() {
+
+    if (!loadingBox) {
+        return;
+    }
+
+    loadingBox.style.display =
+        "none";
+}
+
+
+function showResult() {
+
+    if (!resultBox) {
+        return;
+    }
+
+    resultBox.style.display =
+        "block";
+}
+
+
+function hideResult() {
+
+    if (!resultBox) {
+        return;
+    }
+
+    resultBox.style.display =
+        "none";
+}
+
+
+// ============================================================
+// CHARACTER COUNTER
+// ============================================================
+
+function updateCharacterCount() {
+
+    if (!textInput || !charCount) {
+        return;
+    }
+
+    const length =
+        textInput.value.length;
+
+    charCount.textContent =
+        length + " / 5000";
+}
+
+
+if (textInput) {
+
+    textInput.addEventListener(
+        "input",
+        updateCharacterCount
+    );
+
+    updateCharacterCount();
+}
+
+
+// ============================================================
+// EXAMPLE TEXT
+// ============================================================
+
+if (exampleBtn) {
+
+    exampleBtn.addEventListener(
+        "click",
+        function () {
 
             if (!textInput) {
-
                 return;
-
             }
 
-
-            const length =
-                textInput.value.length;
-
-
-            if (charCount) {
-
-                charCount.textContent =
-                    length;
-
-            }
-
-        }
-
-
-        if (textInput) {
-
-            textInput.addEventListener(
-                "input",
-                updateCounter
-            );
-
-        }
-
-
-        // =================================================
-        // EXAMPLE BUTTON
-        // =================================================
-
-        if (exampleBtn) {
-
-            exampleBtn.addEventListener(
-                "click",
-                function () {
-
-                    if (!textInput) {
-
-                        return;
-
-                    }
-
-
-                    textInput.value =
+            textInput.value =
 `Hello everyone.
 
 Welcome to my channel.
@@ -225,1175 +213,818 @@ Thank you for listening, and I hope you enjoy this episode.
 
 See you in the next video.`;
 
-
-                    updateCounter();
-
-                }
-            );
-
+            updateCharacterCount();
         }
+    );
+}
 
 
-        // =================================================
-        // COPY TEXT
-        // =================================================
+// ============================================================
+// COPY TEXT
+// ============================================================
 
-        if (copyTextBtn) {
+if (copyTextBtn) {
 
-            copyTextBtn.addEventListener(
-                "click",
-                async function () {
+    copyTextBtn.addEventListener(
+        "click",
+        async function () {
 
-                    if (!textInput) {
+            if (!textInput) {
+                return;
+            }
 
-                        return;
+            const text =
+                textInput.value;
 
-                    }
+            if (!text) {
+                showError(
+                    "Tidak ada teks untuk disalin."
+                );
 
+                return;
+            }
 
-                    const text =
-                        textInput.value.trim();
+            try {
 
+                await navigator.clipboard.writeText(
+                    text
+                );
 
-                    if (!text) {
+                copyTextBtn.textContent =
+                    "Copied!";
 
-                        alert(
-                            "Please enter your English script first."
-                        );
-
-                        return;
-
-                    }
-
-
-                    try {
-
-                        await navigator.clipboard.writeText(
-                            text
-                        );
-
+                setTimeout(
+                    function () {
 
                         copyTextBtn.textContent =
-                            "✓ Copied";
+                            "Copy";
+
+                    },
+                    1500
+                );
+
+            } catch (error) {
+
+                showError(
+                    "Gagal menyalin teks."
+                );
+            }
+        }
+    );
+}
 
 
-                        setTimeout(
-                            function () {
+// ============================================================
+// VOICE FILE
+// ============================================================
 
-                                copyTextBtn.textContent =
-                                    "Copy Text";
+if (voiceInput) {
 
-                            },
-                            1500
-                        );
+    voiceInput.addEventListener(
+        "change",
+        function () {
 
+            hideError();
 
-                    } catch (error) {
+            const file =
+                voiceInput.files &&
+                voiceInput.files[0];
 
-                        console.error(
-                            "Copy error:",
-                            error
-                        );
+            if (!file) {
 
+                selectedVoiceFile =
+                    null;
 
-                        alert(
-                            "Could not copy automatically."
-                        );
+                return;
+            }
 
-                    }
+            selectedVoiceFile =
+                file;
 
-                }
+            console.log(
+                "Selected voice file:",
+                file
             );
 
-        }
-
-
-        // =================================================
-        // VOICE UPLOAD
-        // =================================================
-
-        if (voiceInput) {
-
-            voiceInput.addEventListener(
-                "change",
-                function () {
-
-                    const file =
-                        voiceInput.files[0];
-
-
-                    if (!file) {
-
-                        selectedVoiceFile =
-                            null;
-
-                        return;
-
-                    }
-
-
-                    // -------------------------------------
-                    // CHECK AUDIO FILE
-                    // -------------------------------------
-
-                    if (
-                        !file.type ||
-                        !file.type.startsWith(
-                            "audio/"
-                        )
-                    ) {
-
-                        alert(
-                            "Please select an audio file."
-                        );
-
-
-                        voiceInput.value =
-                            "";
-
-
-                        selectedVoiceFile =
-                            null;
-
-
-                        return;
-
-                    }
-
-
-                    // -------------------------------------
-                    // SAVE FILE
-                    // -------------------------------------
-
-                    selectedVoiceFile =
-                        file;
-
-
-                    const sizeMB =
-                        (
-                            file.size /
-                            (
-                                1024 *
-                                1024
-                            )
-                        ).toFixed(2);
-
-
-                    console.log(
-                        "Voice selected:",
-                        file.name
-                    );
-
-                    console.log(
-                        "Voice type:",
-                        file.type
-                    );
-
-                    console.log(
-                        "Voice size:",
-                        file.size
-                    );
-
-
-                    // -------------------------------------
-                    // DISPLAY INFORMATION
-                    // -------------------------------------
-
-                    if (voiceInfo) {
-
-                        voiceInfo.classList.remove(
-                            "hidden"
-                        );
-
-
-                        voiceInfo.innerHTML = `
-                            <strong>Selected:</strong>
-                            ${escapeHtml(file.name)}
-                            <br>
-                            <strong>Size:</strong>
-                            ${sizeMB} MB
-                            <br>
-                            <strong>Type:</strong>
-                            ${escapeHtml(file.type || "unknown")}
-                        `;
-
-                    }
-
-
-                    // -------------------------------------
-                    // AUDIO PREVIEW
-                    // -------------------------------------
-
-                    if (voicePreview) {
-
-                        try {
-
-                            const objectURL =
-                                URL.createObjectURL(
-                                    file
-                                );
-
-
-                            voicePreview.src =
-                                objectURL;
-
-
-                            voicePreview.classList.remove(
-                                "hidden"
-                            );
-
-
-                        } catch (error) {
-
-                            console.error(
-                                "Preview error:",
-                                error
-                            );
-
-                        }
-
-                    }
-
-
-                    // -------------------------------------
-                    // DOWNLOAD ORIGINAL
-                    // -------------------------------------
-
-                    if (downloadVoiceBtn) {
-
-                        downloadVoiceBtn.classList.remove(
-                            "hidden"
-                        );
-
-                    }
-
-                }
-            );
-
-        }
-
-
-        // =================================================
-        // DOWNLOAD ORIGINAL VOICE
-        // =================================================
-
-        if (downloadVoiceBtn) {
-
-            downloadVoiceBtn.addEventListener(
-                "click",
-                function () {
-
-                    if (!selectedVoiceFile) {
-
-                        alert(
-                            "Please select your voice recording first."
-                        );
-
-                        return;
-
-                    }
-
-
-                    const url =
-                        URL.createObjectURL(
-                            selectedVoiceFile
-                        );
-
-
-                    const link =
-                        document.createElement(
-                            "a"
-                        );
-
-
-                    link.href =
-                        url;
-
-
-                    link.download =
-                        "my-voice-reference" +
-                        getFileExtension(
-                            selectedVoiceFile.name
-                        );
-
-
-                    document.body.appendChild(
-                        link
-                    );
-
-
-                    link.click();
-
-
-                    link.remove();
-
-
-                    setTimeout(
-                        function () {
-
-                            URL.revokeObjectURL(
-                                url
-                            );
-
-                        },
-                        1000
-                    );
-
-                }
-            );
-
-        }
-
-
-        // =================================================
-        // GENERATE VOICE
-        // =================================================
-
-        generateBtn.addEventListener(
-            "click",
-            async function () {
-
-
-                console.log(
-                    "============================================"
-                );
-
-                console.log(
-                    "GENERATE BUTTON CLICKED"
-                );
-
-                console.log(
-                    "============================================"
-                );
-
-
-                // =========================================
-                // CHECK COLAB URL
-                // =========================================
-
-                if (
-                    !COLAB_URL ||
-                    COLAB_URL.includes(
-                        "PASTE_URL"
-                    )
-                ) {
-
-                    showError(
-                        "Google Colab belum terhubung. Masukkan URL .gradio.live dari Colab ke script.js."
-                    );
-
-                    return;
-
-                }
-
-
-                // =========================================
-                // CHECK TEXT
-                // =========================================
-
-                const text =
-                    textInput
-                        ? textInput.value.trim()
-                        : "";
-
-
-                if (!text) {
-
-                    showError(
-                        "Please enter your English script."
-                    );
-
-                    return;
-
-                }
-
-
-                // =========================================
-                // CHECK VOICE
-                // =========================================
-
-                if (!selectedVoiceFile) {
-
-                    showError(
-                        "Please upload your voice sample first."
-                    );
-
-                    return;
-
-                }
-
-
-                // =========================================
-                // FILE INFORMATION
-                // =========================================
-
-                console.log(
-                    "Text length:",
-                    text.length
-                );
-
-                console.log(
-                    "Voice file:",
-                    selectedVoiceFile.name
-                );
-
-                console.log(
-                    "Voice type:",
-                    selectedVoiceFile.type
-                );
-
-                console.log(
-                    "Voice size:",
-                    selectedVoiceFile.size
-                );
-
-
-                // =========================================
-                // DISABLE BUTTON
-                // =========================================
-
-                generateBtn.disabled =
-                    true;
-
-
-                generateBtn.textContent =
-                    "⏳ Connecting...";
-
-
-                if (loadingBox) {
-
-                    loadingBox.classList.remove(
-                        "hidden"
-                    );
-
-                }
-
-
-                if (errorBox) {
-
-                    errorBox.classList.add(
-                        "hidden"
-                    );
-
-                }
-
-
-                // =========================================
-                // CLEAR OLD RESULT
-                // =========================================
-
-                if (outputAudio) {
-
-                    outputAudio.pause();
-
-                    outputAudio.removeAttribute(
-                        "src"
-                    );
-
-                    outputAudio.load();
-
-                    outputAudio.classList.add(
-                        "hidden"
-                    );
-
-                }
-
-
-                if (downloadResultBtn) {
-
-                    downloadResultBtn.classList.add(
-                        "hidden"
-                    );
-
-                    downloadResultBtn.removeAttribute(
-                        "href"
-                    );
-
-                }
-
-
-                if (resultBox) {
-
-                    resultBox.innerHTML = `
-                        <div class="result-icon">
-                            🔌
-                        </div>
-
-                        <p>
-                            Connecting to Google Colab...
-                        </p>
-
-                        <p class="small-text">
-                            Please wait.
-                        </p>
-                    `;
-
-                }
-
+            // ------------------------------------------------
+            // INFO
+            // ------------------------------------------------
+
+            if (voiceInfo) {
+
+                const sizeMB =
+                    (
+                        file.size /
+                        1024 /
+                        1024
+                    ).toFixed(2);
+
+                voiceInfo.textContent =
+                    `${file.name} • ${sizeMB} MB`;
+            }
+
+            // ------------------------------------------------
+            // PREVIEW
+            // ------------------------------------------------
+
+            if (voicePreview) {
 
                 try {
 
-
-                    // =====================================
-                    // LOAD GRADIO CLIENT
-                    // =====================================
-
-                    console.log(
-                        "Loading Gradio client..."
-                    );
-
-
-                    const module =
-                        await import(
-                            GRADIO_CLIENT_URL
+                    const previewURL =
+                        URL.createObjectURL(
+                            file
                         );
 
+                    voicePreview.src =
+                        previewURL;
 
-                    console.log(
-                        "Gradio module loaded:",
-                        module
-                    );
+                    voicePreview.style.display =
+                        "block";
 
+                } catch (error) {
 
-                    const Client =
-                        module.Client;
-
-
-                    const handle_file =
-                        module.handle_file;
-
-
-                    if (!Client) {
-
-                        throw new Error(
-                            "Gradio Client tidak ditemukan."
-                        );
-
-                    }
-
-
-                    if (!handle_file) {
-
-                        throw new Error(
-                            "handle_file tidak ditemukan."
-                        );
-
-                    }
-
-
-                    console.log(
-                        "✓ Client tersedia"
-                    );
-
-                    console.log(
-                        "✓ handle_file tersedia"
-                    );
-
-
-                    // =====================================
-                    // CONNECT TO COLAB
-                    // =====================================
-
-                    generateBtn.textContent =
-                        "🔌 Connecting...";
-
-
-                    if (resultBox) {
-
-                        resultBox.innerHTML = `
-                            <div class="result-icon">
-                                🔌
-                            </div>
-
-                            <p>
-                                Connecting to Google Colab...
-                            </p>
-
-                            <p class="small-text">
-                                Connecting to Gradio server...
-                            </p>
-                        `;
-
-                    }
-
-
-                    console.log(
-                        "Connecting to:",
-                        COLAB_URL
-                    );
-
-
-                    const client =
-                        await Client.connect(
-                            COLAB_URL
-                        );
-
-
-                    console.log(
-                        "============================================"
-                    );
-
-                    console.log(
-                        "✓ CONNECTED TO GRADIO"
-                    );
-
-                    console.log(
-                        "============================================"
-                    );
-
-
-                    // =====================================
-                    // VIEW API
-                    // =====================================
-
-                    try {
-
-                        const apiInfo =
-                            await client.view_api();
-
-
-                        console.log(
-                            "Gradio API information:",
-                            apiInfo
-                        );
-
-
-                    } catch (apiError) {
-
-                        console.warn(
-                            "view_api() gagal:",
-                            apiError
-                        );
-
-                    }
-
-
-                    // =====================================
-                    // UPDATE UI
-                    // =====================================
-
-                    generateBtn.textContent =
-                        "📤 Uploading...";
-
-
-                    if (resultBox) {
-
-                        resultBox.innerHTML = `
-                            <div class="result-icon">
-                                📤
-                            </div>
-
-                            <p>
-                                Sending voice sample to Colab...
-                            </p>
-
-                            <p class="small-text">
-                                Please wait while the file is uploaded.
-                            </p>
-                        `;
-
-                    }
-
-
-                    // =====================================
-                    // PREPARE FILE
-                    // =====================================
-
-                    console.log(
-                        "Preparing voice file..."
-                    );
-
-
-                    const voiceFile =
-                        handle_file(
-                            selectedVoiceFile
-                        );
-
-
-                    console.log(
-                        "Voice file prepared:",
-                        voiceFile
-                    );
-
-
-                    // =====================================
-                    // CALL XTTS ENDPOINT
-                    // =====================================
-
-                    console.log(
-                        "Calling /generate_from_website ..."
-                    );
-
-
-                    generateBtn.textContent =
-                        "⚙️ Processing...";
-
-
-                    if (resultBox) {
-
-                        resultBox.innerHTML = `
-                            <div class="result-icon">
-                                ⚙️
-                            </div>
-
-                            <p>
-                                XTTS-v2 is generating your voice...
-                            </p>
-
-                            <p class="small-text">
-                                Please wait. This can take some time.
-                            </p>
-                        `;
-
-                    }
-
-
-                    const result =
-                        await client.predict(
-                            "/generate_from_website",
-                            [
-                                voiceFile,
-                                text,
-                                "en"
-                            ]
-                        );
-
-
-                    // =====================================
-                    // LOG RESULT
-                    // =====================================
-
-                    console.log(
-                        "============================================"
-                    );
-
-                    console.log(
-                        "GRADIO RESULT"
-                    );
-
-                    console.log(
-                        result
-                    );
-
-                    console.log(
-                        "============================================"
-                    );
-
-
-                    // =====================================
-                    // CHECK RESULT
-                    // =====================================
-
-                    if (
-                        !result ||
-                        !result.data
-                    ) {
-
-                        throw new Error(
-                            "Colab tidak mengembalikan data."
-                        );
-
-                    }
-
-
-                    const output =
-                        result.data[0];
-
-
-                    console.log(
-                        "Output audio:",
-                        output
-                    );
-
-
-                    if (!output) {
-
-                        throw new Error(
-                            "Colab tidak mengembalikan file audio."
-                        );
-
-                    }
-
-
-                    // =====================================
-                    // FIND AUDIO URL
-                    // =====================================
-
-                    let audioURL =
-                        null;
-
-
-                    if (
-                        typeof output ===
-                        "string"
-                    ) {
-
-                        audioURL =
-                            output;
-
-                    }
-
-
-                    else if (
-                        output.url
-                    ) {
-
-                        audioURL =
-                            output.url;
-
-                    }
-
-
-                    else if (
-                        output.path
-                    ) {
-
-                        audioURL =
-                            output.path;
-
-                    }
-
-
-                    else if (
-                        output.file &&
-                        output.file.url
-                    ) {
-
-                        audioURL =
-                            output.file.url;
-
-                    }
-
-
-                    else if (
-                        output.data &&
-                        output.data.url
-                    ) {
-
-                        audioURL =
-                            output.data.url;
-
-                    }
-
-
-                    // =====================================
-                    // CHECK AUDIO URL
-                    // =====================================
-
-                    if (!audioURL) {
-
-                        console.error(
-                            "Unknown output format:",
-                            output
-                        );
-
-
-                        throw new Error(
-                            "Format file audio dari Colab tidak dikenali."
-                        );
-
-                    }
-
-
-                    console.log(
-                        "Audio URL:",
-                        audioURL
-                    );
-
-
-                    // =====================================
-                    // SHOW AUDIO
-                    // =====================================
-
-                    if (outputAudio) {
-
-                        outputAudio.src =
-                            audioURL;
-
-
-                        outputAudio.classList.remove(
-                            "hidden"
-                        );
-
-
-                        outputAudio.load();
-
-                    }
-
-
-                    // =====================================
-                    // SHOW DOWNLOAD BUTTON
-                    // =====================================
-
-                    if (downloadResultBtn) {
-
-                        downloadResultBtn.href =
-                            audioURL;
-
-
-                        downloadResultBtn.download =
-                            "cloned_voice.wav";
-
-
-                        downloadResultBtn.classList.remove(
-                            "hidden"
-                        );
-
-                    }
-
-
-                    // =====================================
-                    // SUCCESS MESSAGE
-                    // =====================================
-
-                    if (resultBox) {
-
-                        resultBox.innerHTML = `
-                            <div class="result-icon">
-                                🎉
-                            </div>
-
-                            <p>
-                                Voice generation completed!
-                            </p>
-
-                            <p class="small-text">
-                                Your cloned voice is ready.
-                            </p>
-                        `;
-
-                    }
-
-
-                    console.log(
-                        "============================================"
-                    );
-
-                    console.log(
-                        "✅ VOICE GENERATION SUCCESS"
-                    );
-
-                    console.log(
-                        "============================================"
-                    );
-
-
-                }
-
-
-                catch (error) {
-
-
-                    console.error(
-                        "============================================"
-                    );
-
-                    console.error(
-                        "❌ GENERATION ERROR"
-                    );
-
-                    console.error(
+                    console.warn(
+                        "Voice preview error:",
                         error
                     );
-
-                    console.error(
-                        "============================================"
-                    );
-
-
-                    let message =
-                        "Generation failed.";
-
-
-                    if (
-                        error &&
-                        error.message
-                    ) {
-
-                        message +=
-                            " " +
-                            error.message;
-
-                    }
-
-
-                    showError(
-                        message
-                    );
-
-
-                    if (resultBox) {
-
-                        resultBox.innerHTML = `
-                            <div class="result-icon">
-                                ❌
-                            </div>
-
-                            <p>
-                                Generation failed.
-                            </p>
-
-                            <p class="small-text">
-                                ${escapeHtml(message)}
-                            </p>
-                        `;
-
-                    }
-
                 }
+            }
 
+            // ------------------------------------------------
+            // DOWNLOAD ORIGINAL
+            // ------------------------------------------------
 
-                finally {
+            if (downloadVoiceBtn) {
 
+                try {
 
-                    generateBtn.disabled =
-                        false;
-
-
-                    generateBtn.textContent =
-                        "🚀 Generate Voice";
-
-
-                    if (loadingBox) {
-
-                        loadingBox.classList.add(
-                            "hidden"
+                    const url =
+                        URL.createObjectURL(
+                            file
                         );
 
-                    }
+                    downloadVoiceBtn.href =
+                        url;
 
+                    downloadVoiceBtn.download =
+                        file.name;
+
+                    downloadVoiceBtn.style.display =
+                        "inline-block";
+
+                } catch (error) {
+
+                    console.warn(
+                        "Download original voice error:",
+                        error
+                    );
                 }
-
             }
+        }
+    );
+}
+
+
+// ============================================================
+// LOAD GRADIO CLIENT
+// ============================================================
+
+async function loadGradioClient() {
+
+    if (gradioClient) {
+        return gradioClient;
+    }
+
+    showLoading(
+        "Menghubungkan ke server AI..."
+    );
+
+    try {
+
+        const module =
+            await import(
+                GRADIO_CLIENT_URL
+            );
+
+        if (!module.Client) {
+
+            throw new Error(
+                "Gradio Client tidak ditemukan."
+            );
+        }
+
+        const Client =
+            module.Client;
+
+        gradioClient =
+            await Client.connect(
+                COLAB_URL
+            );
+
+        console.log(
+            "Gradio connected:",
+            gradioClient
+        );
+
+        return gradioClient;
+
+    } catch (error) {
+
+        console.error(
+            "Gradio connection error:",
+            error
+        );
+
+        throw new Error(
+            "Tidak dapat terhubung ke server Colab. Pastikan runtime Colab masih aktif."
+        );
+    }
+}
+
+
+// ============================================================
+// GET GRADIO FILE URL
+// ============================================================
+
+function extractAudioURL(result) {
+
+    console.log(
+        "Extracting audio from result:",
+        result
+    );
+
+    if (!result) {
+        return null;
+    }
+
+
+    // --------------------------------------------------------
+    // result.data
+    // --------------------------------------------------------
+
+    const data =
+        result.data;
+
+
+    if (Array.isArray(data)) {
+
+        for (
+            const item of data
+        ) {
+
+            const found =
+                extractAudioURL(
+                    {
+                        data: item
+                    }
+                );
+
+            if (found) {
+                return found;
+            }
+        }
+    }
+
+
+    // --------------------------------------------------------
+    // STRING
+    // --------------------------------------------------------
+
+    if (
+        typeof result ===
+        "string"
+    ) {
+
+        if (
+            result.startsWith(
+                "http://"
+            ) ||
+            result.startsWith(
+                "https://"
+            ) ||
+            result.startsWith(
+                "blob:"
+            ) ||
+            result.startsWith(
+                "data:"
+            )
+        ) {
+
+            return result;
+        }
+    }
+
+
+    // --------------------------------------------------------
+    // OBJECT
+    // --------------------------------------------------------
+
+    if (
+        typeof result ===
+        "object"
+    ) {
+
+        // url
+        if (
+            typeof result.url ===
+            "string"
+        ) {
+
+            return result.url;
+        }
+
+
+        // path
+        if (
+            typeof result.path ===
+            "string"
+        ) {
+
+            return result.path;
+        }
+
+
+        // file.url
+        if (
+            result.file &&
+            typeof result.file.url ===
+            "string"
+        ) {
+
+            return result.file.url;
+        }
+
+
+        // file.path
+        if (
+            result.file &&
+            typeof result.file.path ===
+            "string"
+        ) {
+
+            return result.file.path;
+        }
+
+
+        // data.url
+        if (
+            result.data &&
+            typeof result.data.url ===
+            "string"
+        ) {
+
+            return result.data.url;
+        }
+
+
+        // data.path
+        if (
+            result.data &&
+            typeof result.data.path ===
+            "string"
+        ) {
+
+            return result.data.path;
+        }
+
+
+        // value
+        if (
+            typeof result.value ===
+            "string"
+        ) {
+
+            return result.value;
+        }
+    }
+
+
+    return null;
+}
+
+
+// ============================================================
+// NORMALIZE GRADIO URL
+// ============================================================
+
+function normalizeAudioURL(
+    url
+) {
+
+    if (!url) {
+        return null;
+    }
+
+    // already usable
+    if (
+        url.startsWith(
+            "http://"
+        ) ||
+        url.startsWith(
+            "https://"
+        ) ||
+        url.startsWith(
+            "blob:"
+        ) ||
+        url.startsWith(
+            "data:"
+        )
+    ) {
+
+        return url;
+    }
+
+
+    // relative URL
+    if (
+        url.startsWith("/")
+    ) {
+
+        return (
+            COLAB_URL +
+            url
+        );
+    }
+
+
+    // local Gradio path
+    if (
+        url.startsWith(
+            "file="
+        )
+    ) {
+
+        return (
+            COLAB_URL +
+            "/gradio_api/file=" +
+            encodeURIComponent(
+                url.substring(5)
+            )
+        );
+    }
+
+
+    return url;
+}
+
+
+// ============================================================
+// GENERATE VOICE
+// ============================================================
+
+async function generateVoice() {
+
+    hideError();
+    hideResult();
+
+    // --------------------------------------------------------
+    // CHECK TEXT
+    // --------------------------------------------------------
+
+    if (!textInput) {
+
+        showError(
+            "Text input tidak ditemukan."
+        );
+
+        return;
+    }
+
+    const text =
+        textInput.value.trim();
+
+
+    if (!text) {
+
+        showError(
+            "Masukkan teks terlebih dahulu."
+        );
+
+        return;
+    }
+
+
+    if (text.length > 5000) {
+
+        showError(
+            "Teks terlalu panjang. Maksimal 5000 karakter."
+        );
+
+        return;
+    }
+
+
+    // --------------------------------------------------------
+    // CHECK VOICE
+    // --------------------------------------------------------
+
+    if (!selectedVoiceFile) {
+
+        showError(
+            "Upload rekaman suara terlebih dahulu."
+        );
+
+        return;
+    }
+
+
+    // --------------------------------------------------------
+    // CHECK BUTTON
+    // --------------------------------------------------------
+
+    if (generateBtn) {
+
+        generateBtn.disabled =
+            true;
+
+        generateBtn.dataset.originalText =
+            generateBtn.textContent;
+
+        generateBtn.textContent =
+            "Generating...";
+    }
+
+
+    try {
+
+        showLoading(
+            "Menghubungkan ke AI..."
         );
 
 
-        // =================================================
-        // SHOW ERROR
-        // =================================================
+        // ----------------------------------------------------
+        // CONNECT
+        // ----------------------------------------------------
 
-        function showError(
-            message
-        ) {
-
-            if (errorBox) {
-
-                errorBox.textContent =
-                    message;
+        const client =
+            await loadGradioClient();
 
 
-                errorBox.classList.remove(
-                    "hidden"
-                );
+        // ----------------------------------------------------
+        // FILE
+        // ----------------------------------------------------
 
-            }
+        showLoading(
+            "Mengupload rekaman suara..."
+        );
 
+        const module =
+            await import(
+                GRADIO_CLIENT_URL
+            );
 
-            if (loadingBox) {
-
-                loadingBox.classList.add(
-                    "hidden"
-                );
-
-            }
-
-
-            if (generateBtn) {
-
-                generateBtn.disabled =
-                    false;
+        const handle_file =
+            module.handle_file;
 
 
-                generateBtn.textContent =
-                    "🚀 Generate Voice";
+        if (!handle_file) {
 
-            }
+            throw new Error(
+                "Fungsi handle_file tidak tersedia."
+            );
+        }
 
+
+        const voiceFile =
+            handle_file(
+                selectedVoiceFile
+            );
+
+
+        // ----------------------------------------------------
+        // GENERATE
+        // ----------------------------------------------------
+
+        showLoading(
+            "AI sedang membuat suara... Tunggu beberapa saat."
+        );
+
+
+        console.log(
+            "Calling endpoint:",
+            API_ENDPOINT
+        );
+
+        console.log(
+            "Text:",
+            text
+        );
+
+        console.log(
+            "Voice:",
+            selectedVoiceFile.name
+        );
+
+
+        const result =
+            await client.predict(
+                API_ENDPOINT,
+                [
+                    voiceFile,
+                    text,
+                    "en"
+                ]
+            );
+
+
+        // ----------------------------------------------------
+        // RAW RESULT
+        // ----------------------------------------------------
+
+        console.log(
+            "RAW GRADIO RESULT:",
+            result
+        );
+
+
+        // ----------------------------------------------------
+        // EXTRACT
+        // ----------------------------------------------------
+
+        let audioURL =
+            extractAudioURL(
+                result
+            );
+
+
+        audioURL =
+            normalizeAudioURL(
+                audioURL
+            );
+
+
+        console.log(
+            "Extracted audio URL:",
+            audioURL
+        );
+
+
+        if (!audioURL) {
 
             console.error(
-                "ERROR:",
-                message
+                "Gradio response tidak dikenali:",
+                result
             );
 
-        }
-
-
-        // =================================================
-        // FILE EXTENSION
-        // =================================================
-
-        function getFileExtension(
-            filename
-        ) {
-
-            if (!filename) {
-
-                return ".wav";
-
-            }
-
-
-            const index =
-                filename.lastIndexOf(
-                    "."
-                );
-
-
-            if (index === -1) {
-
-                return ".wav";
-
-            }
-
-
-            return filename.substring(
-                index
+            throw new Error(
+                "Server berhasil merespons tetapi URL audio hasil tidak ditemukan."
             );
-
         }
 
 
-        // =================================================
-        // ESCAPE HTML
-        // =================================================
+        // ----------------------------------------------------
+        // OUTPUT AUDIO
+        // ----------------------------------------------------
 
-        function escapeHtml(
-            text
+        generatedAudioURL =
+            audioURL;
+
+
+        if (outputAudio) {
+
+            outputAudio.src =
+                audioURL;
+
+            outputAudio.controls =
+                true;
+
+            outputAudio.style.display =
+                "block";
+
+            outputAudio.load();
+        }
+
+
+        // ----------------------------------------------------
+        // DOWNLOAD RESULT
+        // ----------------------------------------------------
+
+        if (downloadResultBtn) {
+
+            downloadResultBtn.href =
+                audioURL;
+
+            downloadResultBtn.download =
+                "my-cloned-voice.wav";
+
+            downloadResultBtn.style.display =
+                "inline-block";
+        }
+
+
+        // ----------------------------------------------------
+        // SHOW RESULT
+        // ----------------------------------------------------
+
+        showResult();
+
+
+        showLoading(
+            "✅ Suara berhasil dibuat!"
+        );
+
+
+        setTimeout(
+            function () {
+
+                hideLoading();
+
+            },
+            1500
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "VOICE GENERATION ERROR:",
+            error
+        );
+
+
+        let message =
+            "Pembuatan gagal.";
+
+
+        if (
+            error &&
+            error.message
         ) {
 
-            const div =
-                document.createElement(
-                    "div"
-                );
-
-
-            div.textContent =
-                String(text);
-
-
-            return div.innerHTML;
-
+            message +=
+                " " +
+                error.message;
         }
 
 
-        // =================================================
-        // INITIAL
-        // =================================================
-
-        updateCounter();
-
-
-        console.log(
-            "============================================"
+        showError(
+            message
         );
 
-        console.log(
-            "✓ My Voice Cloner initialized."
-        );
+        hideLoading();
 
-        console.log(
-            "============================================"
-        );
 
+    } finally {
+
+        if (generateBtn) {
+
+            generateBtn.disabled =
+                false;
+
+            if (
+                generateBtn.dataset.originalText
+            ) {
+
+                generateBtn.textContent =
+                    generateBtn.dataset.originalText;
+            }
+        }
     }
+}
+
+
+// ============================================================
+// GENERATE BUTTON
+// ============================================================
+
+if (generateBtn) {
+
+    generateBtn.addEventListener(
+        "click",
+        generateVoice
+    );
+}
+
+
+// ============================================================
+// INITIAL STATE
+// ============================================================
+
+hideError();
+hideLoading();
+hideResult();
+updateCharacterCount();
+
+
+console.log(
+    "========================================"
+);
+
+console.log(
+    "MY VOICE CLONER FRONTEND LOADED"
+);
+
+console.log(
+    "Colab:",
+    COLAB_URL
+);
+
+console.log(
+    "Endpoint:",
+    API_ENDPOINT
+);
+
+console.log(
+    "========================================"
 );
