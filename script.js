@@ -9,7 +9,7 @@
 // ============================================================
 
 const COLAB_URL =
-    "https://d1a6353dab6c3815d5.gradio.live";
+    "https://8f7b5a1f89e073d8e3.gradio.live";
 
 const GRADIO_CLIENT_URL =
     "https://cdn.jsdelivr.net/npm/@gradio/client@2.7.0/dist/index.min.js";
